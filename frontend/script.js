@@ -26,6 +26,15 @@ const state = {
 
 // ==================== HELPERS ====================
 
+const APP_CONFIG = window.APP_CONFIG || {};
+const API_BASE_URL = (APP_CONFIG.apiBaseUrl || '').replace(/\/+$/, '');
+
+function toApiUrl(path) {
+    if (/^https?:\/\//i.test(path)) return path;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_BASE_URL}${normalizedPath}`;
+}
+
 const API = {
     getHeaders() {
         const headers = {};
@@ -35,7 +44,7 @@ const API = {
         return headers;
     },
     async get(url) {
-        const res = await fetch(url, { headers: API.getHeaders() });
+        const res = await fetch(toApiUrl(url), { headers: API.getHeaders() });
         if (!res.ok) {
             if (res.status === 401 && state.authToken) {
                 handleLogout();
@@ -46,7 +55,7 @@ const API = {
         return res.json();
     },
     async post(url, data) {
-        const res = await fetch(url, {
+        const res = await fetch(toApiUrl(url), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...API.getHeaders() },
             body: JSON.stringify(data)
@@ -61,7 +70,7 @@ const API = {
         return res.json();
     },
     async postForm(url, formData) {
-        const res = await fetch(url, {
+        const res = await fetch(toApiUrl(url), {
             method: 'POST',
             headers: { ...API.getHeaders() },
             body: formData
@@ -76,7 +85,7 @@ const API = {
         return res.json();
     },
     async put(url, data) {
-        const res = await fetch(url, {
+        const res = await fetch(toApiUrl(url), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', ...API.getHeaders() },
             body: JSON.stringify(data)
@@ -91,7 +100,7 @@ const API = {
         return res.json();
     },
     async del(url) {
-        const res = await fetch(url, { method: 'DELETE', headers: API.getHeaders() });
+        const res = await fetch(toApiUrl(url), { method: 'DELETE', headers: API.getHeaders() });
         if (!res.ok) {
             if (res.status === 401 && state.authToken) {
                 handleLogout();
@@ -886,7 +895,7 @@ async function exportExcel() {
 
         showToast('Menyiapkan file Excel...', 'info');
         
-        const res = await fetch(url, { headers: API.getHeaders() });
+        const res = await fetch(toApiUrl(url), { headers: API.getHeaders() });
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
             throw new Error(err.detail || 'Download gagal');
