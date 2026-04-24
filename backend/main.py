@@ -12,11 +12,11 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from backend.database import init_db, get_db
-from backend.models import Transaction
-from backend.routes import products, transactions, reports
-from backend import sheets
-from backend.auth import login as auth_login, require_auth
+from database import init_db, get_db
+from models import Transaction
+from routes import products, transactions, reports
+import sheets
+from auth import login as auth_login, require_auth
 
 # Initialize FastAPI app
 app = FastAPI(
