@@ -39,7 +39,7 @@ def get_db():
 
 def init_db():
     """Create all tables in the database."""
-    from backend.models import Product, Transaction, TransactionItem  # noqa: F401
+    from models import Product, Transaction, TransactionItem  # noqa: F401
     Base.metadata.create_all(bind=engine)
     _apply_safe_migrations()
 
