@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratu Ngemil — Sistem Kasir</title>
+    <meta name="description" content="Sistem kasir terintegrasi untuk UMKM Ratu Ngemil">
+    <link rel="icon" type="image/png" href="/static/assets/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <img src="/static/assets/logo.png" class="logo-img login-logo" alt="Logo Ratu Ngemil">
+            <h2>Login POS</h2>
+            <p>Masuk dengan username dan password</p>
+            <div class="form-group">
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary" id="btn-login">Masuk</button>
+            <small id="login-hint">Default: admin / admin123</small>
+        </div>
+    </div>
+
+    <!-- ===== HEADER / NAVIGATION ===== -->
+    <header id="app-header">
+        <div class="header-brand">
+            <span class="brand-icon">
+                <img src="/static/assets/logo.png" class="logo-img" alt="Logo Ratu Ngemil">
+            </span>
+            <h1 class="brand-name">Ratu Ngemil</h1>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-btn active" data-tab="pos" id="nav-pos">
+                <span class="nav-icon">🛒</span>
+                <span class="nav-label">Kasir</span>
+            </button>
+            <button class="nav-btn" data-tab="products" id="nav-products">
+                <span class="nav-icon">📦</span>
+                <span class="nav-label">Produk</span>
+            </button>
+            <button class="nav-btn" data-tab="reports" id="nav-reports">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Laporan</span>
+            </button>
+            <button class="nav-btn" data-tab="settings" id="nav-settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Pengaturan</span>
+            </button>
+        </nav>
+        <div class="header-clock" id="header-clock"></div>
+        <button class="btn btn-sm btn-ghost" id="btn-logout">Logout</button>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main id="app-main">
+
+        <!-- ==================== POS TAB ==================== -->
+        <section class="tab-content active" id="tab-pos">
+            <div class="pos-layout">
+                <!-- Left: Product Grid -->
+                <div class="pos-products">
+                    <div class="pos-search-bar">
+                        <div class="search-input-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="pos-search" placeholder="Cari produk..." autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="pos-categories" id="pos-categories">
+                        <!-- Categories loaded dynamically -->
+                    </div>
+                    <div class="pos-product-grid" id="pos-product-grid">
+                        <!-- Products loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Right: Cart -->
+                <div class="pos-cart">
+                    <div class="cart-header">
+                        <h2>🧾 Keranjang</h2>
+                        <button class="btn btn-sm btn-ghost" id="btn-clear-cart"
+                            title="Kosongkan keranjang">🗑️</button>
+                    </div>
+                    <div class="cart-items" id="cart-items">
+                        <div class="cart-empty" id="cart-empty">
+                            <span class="cart-empty-icon">🛒</span>
+                            <p>Keranjang kosong</p>
+                            <p class="cart-empty-hint">Klik produk untuk menambahkan</p>
+                        </div>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="cart-row">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">Rp 0</span>
+                        </div>
+                        <div class="cart-row cart-row-tax">
+                            <span>PPN (<span id="tax-rate-label">0</span>%)</span>
+                            <span id="cart-tax">Rp 0</span>
+                        </div>
+                        <div class="cart-row cart-row-total">
+                            <span>TOTAL</span>
+                            <span id="cart-total">Rp 0</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-pay" id="btn-pay" disabled>
+                        💳 Bayar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== PRODUCTS TAB ==================== -->
+        <section class="tab-content" id="tab-products">
+            <div class="page-header">
+                <h2>📦 Manajemen Produk</h2>
+                <button class="btn btn-primary" id="btn-add-product">
+                    <span>+</span> Tambah Produk
+                </button>
+            </div>
+            <div class="product-search-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="product-search" placeholder="Cari produk...">
+                </div>
+            </div>
+            <div class="product-table-wrap">
+                <table class="product-table" id="product-table">
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nama</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="product-empty" style="display:none;">
+                    <span>📦</span>
+                    <p>Belum ada produk</p>
+                    <p>Klik "Tambah Produk" untuk memulai</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== REPORTS TAB ==================== -->
+        <section class="tab-content" id="tab-reports">
+            <div class="page-header">
+                <h2>📊 Laporan Penjualan</h2>
+                <div class="report-actions">
+                    <button class="btn btn-success" id="btn-export-excel">📥 Export Excel</button>
+                    <button class="btn btn-google" id="btn-sync-sheets">📊 Sync Google Sheets</button>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards" id="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-info">
+                        <span class="summary-label">Pendapatan Hari Ini</span>
+                        <span class="summary-value" id="summary-revenue">Rp 0</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">🧾</div>
+                    <div class="summary-info">
+                        <span class="summary-label">Total Transaksi</span>
+                        <span class="summary-value" id="summary-transactions">0</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">📦</div>
+                    <div class="summary-info">
+                        <span class="summary-label">Item Terjual</span>
+                        <span class="summary-value" id="summary-items">0</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">📈</div>
+                    <div class="summary-info">
+                        <span class="summary-label">Rata-rata Transaksi</span>
+                        <span class="summary-value" id="summary-avg">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Filter -->
+            <div class="report-filters">
+                <div class="filter-group">
+                    <label>Dari</label>
+                    <input type="date" id="report-date-from">
+                </div>
+                <div class="filter-group">
+                    <label>Sampai</label>
+                    <input type="date" id="report-date-to">
+                </div>
+                <button class="btn btn-primary btn-sm" id="btn-filter-reports">Filter</button>
+            </div>
+
+            <!-- Daily Chart -->
+            <div class="chart-container glass-card">
+                <h3>📈 Pendapatan 7 Hari Terakhir</h3>
+                <div class="bar-chart" id="daily-chart"></div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="glass-card">
+                <h3>📋 Riwayat Transaksi</h3>
+                <div class="transaction-list" id="transaction-list">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SETTINGS TAB ==================== -->
+        <section class="tab-content" id="tab-settings">
+            <div class="page-header">
+                <h2>⚙️ Pengaturan</h2>
+            </div>
+
+            <!-- Store Info -->
+            <div class="settings-section glass-card">
+                <h3>🏪 Informasi Toko</h3>
+                <div class="form-group">
+                    <label for="store-name">Nama Toko</label>
+                    <input type="text" id="store-name" value="Ratu Ngemil" placeholder="Nama toko...">
+                </div>
+                <div class="form-group">
+                    <label for="store-address">Alamat</label>
+                    <input type="text" id="store-address" placeholder="Alamat toko...">
+                </div>
+                <div class="form-group">
+                    <label for="store-phone">No. Telepon</label>
+                    <input type="text" id="store-phone" placeholder="08xx-xxxx-xxxx">
+                </div>
+                <div class="form-group">
+                    <label for="store-branch">Cabang</label>
+                    <input type="text" id="store-branch" placeholder="Contoh: Cabang Pusat">
+                </div>
+                <div class="form-group">
+                    <label for="tax-rate-input">Tarif PPN (%)</label>
+                    <input type="number" id="tax-rate-input" value="0" min="0" max="100" step="1">
+                    <small>Set 0 jika tidak mengenakan pajak. Set 11 untuk PPN 11%.</small>
+                </div>
+                <button class="btn btn-primary" id="btn-save-store">💾 Simpan</button>
+            </div>
+
+            <!-- Google Sheets Config -->
+            <div class="settings-section glass-card">
+                <h3>📊 Google Sheets Integration</h3>
+                <div class="sheets-status" id="sheets-status">
+                    <span class="status-dot status-off"></span>
+                    <span>Belum dikonfigurasi</span>
+                </div>
+                <div class="form-group">
+                    <label for="spreadsheet-id">Spreadsheet ID</label>
+                    <input type="text" id="spreadsheet-id"
+                        placeholder="Masukkan Spreadsheet ID dari URL Google Sheets...">
+                    <small>Ambil dari URL:
+                        https://docs.google.com/spreadsheets/d/<strong>[SPREADSHEET_ID]</strong>/edit</small>
+                </div>
+                <div class="form-group">
+                    <label>File Credentials</label>
+                    <div class="credential-info">
+                        <p>Simpan file <code>google_credentials.json</code> di folder <code>pos-app/data/</code></p>
+                        <span class="credential-status" id="credential-status">⏳ Memeriksa...</span>
+                    </div>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="sheets-enabled">
+                    <label for="sheets-enabled">Aktifkan auto-sync ke Google Sheets</label>
+                </div>
+                <button class="btn btn-google" id="btn-save-sheets">💾 Simpan Konfigurasi Sheets</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Product Modal (Add/Edit) -->
+    <div class="modal-overlay" id="modal-product">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-product-title">Tambah Produk</h3>
+                <button class="modal-close" data-close="modal-product">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-product-id">
+                <div class="form-group">
+                    <label for="input-product-name">Nama Produk *</label>
+                    <input type="text" id="input-product-name" placeholder="Contoh: Keripik Singkong" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-product-category">Kategori *</label>
+                    <input type="text" id="input-product-category" placeholder="Contoh: Makanan" list="category-list">
+                    <datalist id="category-list"></datalist>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-product-price">Harga (Rp) *</label>
+                        <input type="number" id="input-product-price" placeholder="10000" min="0" step="500">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-product-stock">Stok *</label>
+                        <input type="number" id="input-product-stock" placeholder="100" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-product-image">Foto Produk (URL/path)</label>
+                    <input type="text" id="input-product-image" placeholder="/static/assets/produk-keripik.png">
+                </div>
+                <div class="form-group">
+                    <label for="input-product-image-file">Upload Foto Produk (opsional)</label>
+                    <input type="file" id="input-product-image-file" accept="image/png,image/jpeg,image/webp">
+                    <small>Jika upload file, sistem otomatis isi URL foto produk.</small>
+                </div>
+                <div class="image-dropzone" id="image-dropzone">
+                    <p><strong>Tarik & lepas foto di sini</strong></p>
+                    <small>Atau pilih lewat tombol upload di atas</small>
+                </div>
+                <div class="product-preview-wrap">
+                    <img src="/static/assets/logo.png" id="product-image-preview" class="product-image-preview" alt="Preview foto produk">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" data-close="modal-product">Batal</button>
+                <button class="btn btn-primary" id="btn-save-product">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="modal-payment">
+        <div class="modal modal-payment">
+            <div class="modal-header">
+                <h3>💳 Pembayaran</h3>
+                <button class="modal-close" data-close="modal-payment">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-total">
+                    <span class="payment-label">Total yang harus dibayar</span>
+                    <span class="payment-amount" id="payment-total-display">Rp 0</span>
+                </div>
+                <div class="form-group">
+                    <label for="input-payment">Uang yang diterima (Rp)</label>
+                    <input type="number" id="input-payment" placeholder="0" min="0" step="1000" autofocus>
+                </div>
+                <div class="payment-change" id="payment-change-wrap" style="display:none;">
+                    <span class="change-label">Kembalian</span>
+                    <span class="change-amount" id="payment-change-display">Rp 0</span>
+                </div>
+                <div class="quick-pay-buttons">
+                    <button class="btn btn-quick-pay" data-amount="exact">Uang Pas</button>
+                    <button class="btn btn-quick-pay" data-amount="5000">+5rb</button>
+                    <button class="btn btn-quick-pay" data-amount="10000">+10rb</button>
+                    <button class="btn btn-quick-pay" data-amount="20000">+20rb</button>
+                    <button class="btn btn-quick-pay" data-amount="50000">+50rb</button>
+                    <button class="btn btn-quick-pay" data-amount="100000">+100rb</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" data-close="modal-payment">Batal</button>
+                <button class="btn btn-pay" id="btn-confirm-pay" disabled>✅ Proses Pembayaran</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal-overlay" id="modal-receipt">
+        <div class="modal modal-receipt">
+            <div class="modal-header">
+                <h3>🧾 Struk Pembayaran</h3>
+                <button class="modal-close" data-close="modal-receipt">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="receipt" id="receipt-content">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" data-close="modal-receipt">Tutup</button>
+                <button class="btn btn-primary" id="btn-print-receipt">🖨️ Cetak Struk</button>
+                <button class="btn btn-success" id="btn-new-transaction">🆕 Transaksi Baru</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Print Area (hidden, only shows on print) -->
+    <div id="print-area"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
