@@ -6,7 +6,7 @@ Defines Product, Transaction, and TransactionItem tables.
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from backend.database import Base
+from database import Base
 
 
 class Product(Base):

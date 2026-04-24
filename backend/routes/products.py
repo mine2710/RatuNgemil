@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
-from backend.database import get_db
-from backend.models import Product
-from backend.auth import require_auth
+from database import get_db
+from models import Product
+from auth import require_auth
 
 router = APIRouter(prefix="/api/products", tags=["products"], dependencies=[Depends(require_auth)])
 

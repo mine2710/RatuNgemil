@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timedelta
-from backend.database import get_db
-from backend.models import Product, Transaction, TransactionItem
-from backend.auth import require_auth
+from database import get_db
+from models import Product, Transaction, TransactionItem
+from auth import require_auth
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"], dependencies=[Depends(require_auth)])
 

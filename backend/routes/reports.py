@@ -13,9 +13,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 import pandas as pd
 
-from backend.database import get_db
-from backend.models import Transaction, TransactionItem
-from backend.auth import require_auth
+from database import get_db
+from models import Transaction, TransactionItem
+from auth import require_auth
 
 router = APIRouter(prefix="/api/reports", tags=["reports"], dependencies=[Depends(require_auth)])
 
