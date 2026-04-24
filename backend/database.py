@@ -45,15 +45,25 @@ def init_db():
 
 
 def _apply_safe_migrations():
-    """Apply lightweight ALTER TABLE migrations for existing SQLite databases."""
-    if not IS_SQLITE:
-        return
-
+    """Apply lightweight ALTER TABLE migrations for existing databases."""
     inspector = inspect(engine)
     table_names = inspector.get_table_names()
+    dialect = engine.dialect.name
 
     if "transactions" in table_names:
         tx_columns = {col["name"] for col in inspector.get_columns("transactions")}
         if "branch" not in tx_columns:
             with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE transactions ADD COLUMN branch VARCHAR(100) NOT NULL DEFAULT 'Pusat'"))
+                if dialect == "postgresql":
+                    conn.execute(text("ALTER TABLE transactions ADD COLUMN branch VARCHAR(100) NOT NULL DEFAULT 'Pusat'"))
+                else:
+                    conn.execute(text("ALTER TABLE transactions ADD COLUMN branch VARCHAR(100) NOT NULL DEFAULT 'Pusat'"))
+
+    if "products" in table_names:
+        product_columns = {col["name"] for col in inspector.get_columns("products")}
+        if "image_url" not in product_columns:
+            with engine.begin() as conn:
+                if dialect == "postgresql":
+                    conn.execute(text("ALTER TABLE products ADD COLUMN image_url TEXT"))
+                else:
+                    conn.execute(text("ALTER TABLE products ADD COLUMN image_url TEXT"))

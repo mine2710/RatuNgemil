@@ -4,9 +4,7 @@ Serves both the API and the frontend static files.
 """
 
 import os
-from fastapi import FastAPI, Depends, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -129,30 +127,10 @@ def sync_all_to_sheets(
     return result
 
 
-# --- Serve Frontend ---
-
-# Get the directory paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.dirname(BASE_DIR)
-FRONTEND_DIR = os.path.join(PARENT_DIR, "frontend")
-
-# Mount static files
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
-
-
 @app.get("/")
-def serve_index():
-    """Serve the main frontend page."""
-    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
-
-
-@app.get("/favicon.ico", include_in_schema=False)
-def serve_favicon():
-    """Serve favicon to avoid 404 noise in browser logs."""
-    return FileResponse(
-        os.path.join(FRONTEND_DIR, "assets", "logo.png"),
-        media_type="image/png"
-    )
+def root():
+    """Root endpoint for deployment checks."""
+    return {"status": "API jalan"}
 
 
 # --- Startup Event ---
