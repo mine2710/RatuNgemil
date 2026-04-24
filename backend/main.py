@@ -59,6 +59,12 @@ def login(payload: LoginPayload):
     return {"token": token, "username": payload.username}
 
 
+@app.get("/api/health")
+def health_check():
+    """Simple health endpoint for deployment checks."""
+    return {"status": "API jalan"}
+
+
 @app.get("/api/sheets/status")
 def sheets_status(_auth=Depends(require_auth)):
     """Check Google Sheets integration status."""
